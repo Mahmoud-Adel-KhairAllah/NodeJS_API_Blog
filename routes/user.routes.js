@@ -6,10 +6,9 @@ const router = express.Router();
 const User = require("../model/user.model");
 
 router.route("/register").post((req, res) => {
+  console.log(req.body);
   const user = new User({
-    userName: req.body.userName,
-    password: req.body.password,
-    email: req.body.email,
+    ...req.body
   });
   user
     .save()
@@ -23,13 +22,25 @@ router.route("/register").post((req, res) => {
     });
 });
 
-router.route("/:userName").get(middelware.chechToken, (req, res) => {
+router.route("/:userName").get(middelware.checkToken, (req, res) => {
   User.findOne({ userName: req.params.userName }, (err, data) => {
     if (err) return res.status(500).json({ msg: err });
     res.json({
       result: true,
       data: data,
     });
+  });
+});
+
+router.route('/chechUserName/:userName').get((req,res)=>{
+  User.findOne({userName:req.params.userName},(error,data)=>{
+    if(error)return res.status(500).json({msg:error});
+    if(data!==null){
+      return res.json({Status:true});
+
+    }else{
+      return res.json({Status:false});
+    }
   });
 });
 
@@ -52,14 +63,14 @@ router.route("/login").post((req, res) => {
         ) {
           sendToken(req.body.userName, "تم تسجيل الدخول بنجاح", res, true);
         } else if (result.password !== req.body.password) {
-          res.json({ msg: "كلمة المرور غير صحيحة" });
+          res.json({result:false,token:null, msg: "كلمة المرور غير صحيحة" });
         }
       }
     }
   );
 });
 
-router.route("/details").get(middelware.chechToken, (req, res) => {
+router.route("/details").get(middelware.checkToken, (req, res) => {
   console.log(req.decode);
   User.findOne({ userName: req.decode.userName }, (err, data) => {
     if (err) {
@@ -70,7 +81,7 @@ router.route("/details").get(middelware.chechToken, (req, res) => {
   });
 });
 
-router.route("/update/:userName").patch(middelware.chechToken, (req, res) => {
+router.route("/update/:userName").patch(middelware.checkToken, (req, res) => {
   User.findOneAndUpdate(
     {
       userName: req.params.userName,
@@ -92,7 +103,7 @@ router.route("/update/:userName").patch(middelware.chechToken, (req, res) => {
   );
 });
 
-router.route("/delete/:userName").delete(middelware.chechToken, (req, res) => {
+router.route("/delete/:userName").delete(middelware.checkToken, (req, res) => {
   User.findOneAndDelete({ userName: req.params.userName }, (error, data) => {
     if (error) return res.status(500).json({ result: false, msg: errro });
     const msg = {
@@ -104,9 +115,8 @@ router.route("/delete/:userName").delete(middelware.chechToken, (req, res) => {
 });
 
 const sendToken = (userName, msg, res, result) => {
-  let token = jwt.sign({ userName: userName }, config.key, {
-    expiresIn: "24h",
-  });
+  let token = jwt.sign({ userName: userName }, config.key, {}
+  );
   res.json({ result: result, token: token, msg: msg });
 };
 module.exports = router;
