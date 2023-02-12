@@ -6,7 +6,7 @@ const multer = require("multer");
 const path = require("path");
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "./uploads");
+    cb(null, "./uploads/blog");
   },
   filename: (req, file, cb) => {
     cb(null, req.params.id + ".jpg");
@@ -26,18 +26,20 @@ const upload = multer({
   limits: {
     fileSize: 1024 * 1024 * 6,
   },
-    fileFilter: fileFilter,
+//     fileFilter: fileFilter,
 });
 
 //adding cover image
 router
   .route("/add/coverImage/:id")
   .patch(middelware.checkToken, upload.single("img"), (req, res) => {
+     console.log(req.params.id+"<<<<<<<<<<<<<<<<<<<<<<id");
+     console.log(req.file.path+"<<<<<<<<<<<<<<<<<<<<<<path");
     BlogPost.findOneAndUpdate(
       { _id: req.params.id },
       {
         $set: {
-          img: req.file.path,
+          coverImage: req.file.path,
         },
       },
       { new: true },
@@ -53,6 +55,7 @@ router.route('/add').post(middelware.checkToken,(req,res)=>{
           userName:req.decoded.userName,
           title:req.body.title,
           body:req.body.body,
+          createdAt:req.body.createdAt
      });
      blogPost.save().then((result)=>{
           res.json({data:result});

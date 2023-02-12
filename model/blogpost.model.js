@@ -19,6 +19,11 @@ const BlogPost =new mongoose.Schema(
     comment: {
       type:Number,
       default:0},
+      createdAt: {
+        type: String,
+   
+  
+      }
    
   }
 );

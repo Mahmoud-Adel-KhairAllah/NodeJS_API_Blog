@@ -7,7 +7,7 @@ const multer = require("multer");
 const path = require("path");
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "./uploads");
+    cb(null, "./uploads/profile");
   },
   filename: (req, file, cb) => {
     cb(null, req.decoded.userName + ".jpg");
@@ -86,9 +86,9 @@ router.route("/checkProfile").get(middleware.checkToken,(req,res)=>{
   Profile.findOne({userName:req.decoded.userName},(err,result)=>{
     if(err)return res.json({err:err});
     else if(result==null){
-      return res.json({Status:false})
+      return res.json({Status:false,data:[]})
     }else{
-      return res.json({Status:true})
+      return res.json({Status:true,data:result})
 
     }
   })
